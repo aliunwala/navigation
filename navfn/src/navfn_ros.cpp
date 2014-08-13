@@ -58,6 +58,7 @@ namespace navfn {
 
   void NavfnROS::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros){
     if(!initialized_){
+      ROS_INFO("[NAVFNROS] Function:initialize");
       costmap_ros_ = costmap_ros;
       costmap_2d::Costmap2D* costmap = costmap_ros_->getCostmap();
       planner_ = boost::shared_ptr<NavFn>(new NavFn(costmap->getSizeInCellsX(), costmap->getSizeInCellsY()));
@@ -97,6 +98,7 @@ namespace navfn {
   }
 
   bool NavfnROS::validPointPotential(const geometry_msgs::Point& world_point, double tolerance){
+    ROS_INFO("[NAVFNROS] Function:validPointPotential");
     if(!initialized_){
       ROS_ERROR("This planner has not been initialized yet, but it is being used, please call initialize() before use");
       return false;
@@ -124,6 +126,7 @@ namespace navfn {
   }
 
   double NavfnROS::getPointPotential(const geometry_msgs::Point& world_point){
+    ROS_INFO("[NAVFNROS] Function:getPointPotential");
     if(!initialized_){
       ROS_ERROR("This planner has not been initialized yet, but it is being used, please call initialize() before use");
       return -1.0;
@@ -138,6 +141,7 @@ namespace navfn {
   }
 
   bool NavfnROS::computePotential(const geometry_msgs::Point& world_point){
+    ROS_INFO("[NAVFNROS] Function:computePotential");
     if(!initialized_){
       ROS_ERROR("This planner has not been initialized yet, but it is being used, please call initialize() before use");
       return false;
@@ -168,6 +172,7 @@ namespace navfn {
   }
 
   void NavfnROS::clearRobotCell(const tf::Stamped<tf::Pose>& global_pose, unsigned int mx, unsigned int my){
+    ROS_INFO("[NAVFNROS] Function:clearRobotCell");
     if(!initialized_){
       ROS_ERROR("This planner has not been initialized yet, but it is being used, please call initialize() before use");
       return;
@@ -178,6 +183,7 @@ namespace navfn {
   }
 
   bool NavfnROS::makePlanService(nav_msgs::GetPlan::Request& req, nav_msgs::GetPlan::Response& resp){
+    ROS_INFO("[NAVFNROS] Function:makePlanService");
     makePlan(req.start, req.goal, resp.plan.poses);
 
     resp.plan.header.stamp = ros::Time::now();
@@ -187,19 +193,16 @@ namespace navfn {
   } 
 
   void NavfnROS::mapToWorld(double mx, double my, double& wx, double& wy) {
+    //ROS_INFO("[NAVFNROS] Function:mapToWorld");
     costmap_2d::Costmap2D* costmap = costmap_ros_->getCostmap();
     wx = costmap->getOriginX() + mx * costmap->getResolution();
     wy = costmap->getOriginY() + my * costmap->getResolution();
   }
 
-  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start, 
-      const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan){
-    return makePlan(start, goal, default_tolerance_, plan);
-  }
-
-  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start, 
+  bool NavfnROS::makePlanSmall(const geometry_msgs::PoseStamped& start,
       const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan){
     boost::mutex::scoped_lock lock(mutex_);
+    ROS_INFO("[NAVFNROS] Function:makePlanSmall");
     if(!initialized_){
       ROS_ERROR("This planner has not been initialized yet, but it is being used, please call initialize() before use");
       return false;
@@ -351,14 +354,75 @@ namespace navfn {
       }
       potarr_pub_.publish(pot_area);
     }
+    return !plan.empty();
 
+  }
+
+
+  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start,
+      const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan){
+    return makePlan(start, goal, default_tolerance_, plan);
+  }
+
+  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start,
+      const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan){
+
+    ROS_INFO_STREAM("Goal" << goal);
+    ROS_INFO_STREAM("start" << start);
+    geometry_msgs::PoseStamped point1;
+    geometry_msgs::PoseStamped point2;
+
+    point1.header.frame_id = "map";
+//    point1.pose.position.x = 33.33;
+//    point1.pose.position.y = 15;
+    point1.pose.position.x = 25.33;
+    point1.pose.position.y = 19;
+    point1.pose.orientation.x  = 0.0;
+    point1.pose.orientation.y  = 0.0;
+    point1.pose.orientation.z  = -0.709;
+    point1.pose.orientation.w  = 0.7044;
+
+    point2.header.frame_id = "map";
+    point2.pose.position.x = 22.73;
+    point2.pose.position.y = 18.75;
+    point2.pose.orientation.x  = 0.0;
+    point2.pose.orientation.y  = 0.0;
+    point2.pose.orientation.z  = -0.709;
+    point2.pose.orientation.w  = 0.7044;
+
+    std::vector<geometry_msgs::PoseStamped> plan1;
+    std::vector<geometry_msgs::PoseStamped> plan2;
+    std::vector<geometry_msgs::PoseStamped> plan3;
+
+   makePlanSmall(start, point1, tolerance, plan1);
+   makePlanSmall(point1, point2, tolerance, plan2);
+   makePlanSmall(point2, goal, tolerance, plan3);
+
+   plan.clear();
+   plan.insert(plan.end(), plan1.begin(), plan1.end());
+   plan.insert(plan.end(), plan2.begin(), plan2.end());
+   plan.insert(plan.end(), plan3.begin(), plan3.end());
+
+//   makePlanSmall(start, goal, tolerance, plan);
     //publish the plan for visualization purposes
+//    ROS_INFO_STREAM("Plan length" << plan.size());
+//    ROS_INFO_STREAM("Plan Ele0:" << plan[0]);
+//    ROS_INFO_STREAM("Plan Ele1:" << plan[0]);
+//    ROS_INFO_STREAM("Plan Ele10:" << plan[10]);
+//    ROS_INFO_STREAM("Plan Ele20:" << plan[20]);
+
     publishPlan(plan, 0.0, 1.0, 0.0, 0.0);
+//    sleep(10);
+//    publishPlan(plan1, 0.0, 1.0, 0.0, 0.0);
+//    sleep(10);
+//    publishPlan(plan1, 0.0, 1.0, 0.0, 0.0);
+//    sleep(10);
 
     return !plan.empty();
   }
 
   void NavfnROS::publishPlan(const std::vector<geometry_msgs::PoseStamped>& path, double r, double g, double b, double a){
+    ROS_INFO("[NAVFNROS] Function:PublishPlan");
     if(!initialized_){
       ROS_ERROR("This planner has not been initialized yet, but it is being used, please call initialize() before use");
       return;
@@ -383,6 +447,7 @@ namespace navfn {
   }
 
   bool NavfnROS::getPlanFromPotential(const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan){
+    ROS_INFO("[NAVFNROS] Function:getPlanFromPotential");
     if(!initialized_){
       ROS_ERROR("This planner has not been initialized yet, but it is being used, please call initialize() before use");
       return false;
@@ -444,7 +509,7 @@ namespace navfn {
     }
 
     //publish the plan for visualization purposes
-    publishPlan(plan, 0.0, 1.0, 0.0, 0.0);
+//    publishPlan(plan, 0.0, 1.0, 0.0, 0.0);
     return !plan.empty();
   }
 };

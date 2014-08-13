@@ -227,6 +227,7 @@ namespace navfn {
   void
     NavFn::setCostmap(const COSTTYPE *cmap, bool isROS, bool allow_unknown)
     {
+    ROS_INFO("[NAVFN] Function:setCostmap");
       COSTTYPE *cm = costarr;
       if (isROS)			// ROS-type cost array
       {
@@ -289,6 +290,7 @@ namespace navfn {
   bool
     NavFn::calcNavFnDijkstra(bool atStart)
     {
+    ROS_INFO("[NAVFN] Function:calcNavDijkstra");
 #if 0
       static char costmap_filename[1000];
       static int file_number = 0;
@@ -324,6 +326,7 @@ namespace navfn {
   bool
     NavFn::calcNavFnAstar()
     {
+    ROS_INFO("[NAVFN] Function:calcNavFnAstar");
       setupNavFn(true);
 
       // calculate the nav fn and path
@@ -401,6 +404,7 @@ namespace navfn {
   void
     NavFn::setupNavFn(bool keepit)
     {
+    ROS_INFO("[NAVFN] Function:setupNavFn");
       // reset values in propagation arrays
       for (int i=0; i<ns; i++)
       {
@@ -455,6 +459,7 @@ namespace navfn {
   void
     NavFn::initCost(int k, float v)
     {
+    ROS_INFO("[NAVFN] Function:initCost");
       potarr[k] = v;
       push_cur(k+1);
       push_cur(k-1);
@@ -476,6 +481,7 @@ namespace navfn {
   inline void
     NavFn::updateCell(int n)
     {
+    //ROS_INFO("[NAVFN] Function:updateCell");
       // get neighbors
       float u,d,l,r;
       l = potarr[n-1];
@@ -561,6 +567,7 @@ namespace navfn {
   inline void
     NavFn::updateCellAstar(int n)
     {
+    ROS_INFO("[NAVFN] Function:UpdateCellAstar");
       // get neighbors
       float u,d,l,r;
       l = potarr[n-1];
@@ -651,6 +658,7 @@ namespace navfn {
   bool
     NavFn::propNavFnDijkstra(int cycles, bool atStart)	
     {
+    ROS_INFO("[NAVFN] Function:propNavFnDijkstra");
       int nwv = 0;			// max priority block size
       int nc = 0;			// number of cells put into priority blocks
       int cycle = 0;		// which cycle we're on
@@ -728,6 +736,7 @@ namespace navfn {
   bool
     NavFn::propNavFnAstar(int cycles)	
     {
+    ROS_INFO("[NAVFN] Function:propNavFnAstar");
       int nwv = 0;			// max priority block size
       int nc = 0;			// number of cells put into priority blocks
       int cycle = 0;		// which cycle we're on
@@ -821,6 +830,7 @@ namespace navfn {
   int
     NavFn::calcPath(int n, int *st)
     {
+    ROS_INFO("[NAVFN] Function:calcPath");
       // test write
       //savemap("test");
 
@@ -991,6 +1001,7 @@ namespace navfn {
   float				
     NavFn::gradCell(int n)
     {
+    //ROS_INFO("[NAVFN] Function:gradCell");
       if (gradx[n]+grady[n] > 0.0)	// check this cell
         return 1.0;			
 
@@ -1050,6 +1061,7 @@ namespace navfn {
   void
     NavFn::display(void fn(NavFn *nav), int n)
     {
+    ROS_INFO("[NAVFN] Function:display");
       displayFn = fn;
       displayInt = n;
     }
@@ -1063,6 +1075,7 @@ namespace navfn {
   void 
     NavFn::savemap(const char *fname)
     {
+    ROS_INFO("[NAVFN] Function:savemap");
       char fn[4096];
 
       ROS_DEBUG("[NavFn] Saving costmap and start/goal points");

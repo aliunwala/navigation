@@ -76,6 +76,8 @@ namespace navfn {
        */
       void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
 
+      bool makePlanSmall(const geometry_msgs::PoseStamped& start,
+          const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan);
       /**
        * @brief Given a goal pose in the world, compute a plan
        * @param start The start pose 

@@ -104,6 +104,7 @@ NavfnWithCostmap::NavfnWithCostmap(string name, Costmap2DROS* cmap) :
   cmap_ = cmap;
   make_plan_service_ = private_nh.advertiseService("make_plan", &NavfnWithCostmap::makePlanService, this);
   pose_sub_ = private_nh.subscribe<rm::PoseStamped>("goal", 1, &NavfnWithCostmap::poseCallback, this);
+  ROS_INFO("launched services ALI");
 }
 
 } // namespace
@@ -112,9 +113,11 @@ int main (int argc, char** argv)
 {
   ros::init(argc, argv, "global_planner");
 
+
   tf::TransformListener tf(ros::Duration(10));
 
   costmap_2d::Costmap2DROS lcr("costmap", tf);
+  ROS_INFO("STARTING NODE ALI");
 
   navfn::NavfnWithCostmap navfn("navfn_planner", &lcr);
 

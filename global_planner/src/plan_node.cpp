@@ -110,6 +110,7 @@ int main(int argc, char** argv) {
     tf::TransformListener tf(ros::Duration(10));
 
     costmap_2d::Costmap2DROS lcr("costmap", tf);
+  ROS_INFO("123###########################################ALI WAS HERE");
 
     global_planner::PlannerWithCostmap pppp("planner", &lcr);
 
