@@ -163,6 +163,82 @@ namespace navfn {
         double dy = p1.pose.position.y - p2.pose.position.y;
         return dx*dx +dy*dy;
       }
+      inline double FindDistanceToSegment(double x1, double y1, double x2, double y2, double pointX, double pointY)
+      {
+          double diffX = x2 - x1;
+          float diffY = y2 - y1;
+          if ((diffX == 0) && (diffY == 0))
+          {
+              diffX = pointX - x1;
+              diffY = pointY - y1;
+              return sqrt(diffX * diffX + diffY * diffY);
+          }
+
+          float t = ((pointX - x1) * diffX + (pointY - y1) * diffY) / (diffX * diffX + diffY * diffY);
+
+          if (t < 0)
+          {
+              //point is nearest to the first point i.e x1 and y1
+              diffX = pointX - x1;
+              diffY = pointY - y1;
+          }
+          else if (t > 1)
+          {
+              //point is nearest to the end point i.e x2 and y2
+              diffX = pointX - x2;
+              diffY = pointY - y2;
+          }
+          else
+          {
+              //if perpendicular line intersect the line segment.
+              diffX = pointX - (x1 + t * diffX);
+              diffY = pointY - (y1 + t * diffY);
+          }
+
+          //returning shortest distance
+          return sqrt(diffX * diffX + diffY * diffY);
+      }
+      inline bool clear_path(geometry_msgs::PoseStamped& point1,geometry_msgs::PoseStamped& point2 ){
+    	  bool clear_path = true;
+    	  costmap_2d::Costmap2D* costmap = costmap_ros_->getCostmap();
+    	  unsigned int p1y,p1x,p2x, p2y;
+    	  double beforex1 =  point1.pose.position.x;
+    	  double beforey1 =  point1.pose.position.y;
+    	  costmap->worldToMap( beforex1 , beforey1, p1x , p1y);
+    	  double beforex2 =  point2.pose.position.x;
+    	  double beforey2 =  point2.pose.position.y;
+    	  costmap->worldToMap( beforex2 , beforey2, p2x , p2y);
+
+    	  int lowxpoint;
+    	  int lowxabspoint = abs (p1x - p2x);
+    	  if(p1x < p2x){
+    		  lowxpoint = round(p1x);
+    	  }else{
+    		  lowxpoint = round(p2x);
+    	  }
+
+		  int lowypoint;
+		  int lowyabspoint = abs (p1y - p2y);
+		  if(p1y < p2y){
+			lowypoint = round(p1y);
+		  }else{
+			lowypoint = round(p2y);
+		  }
+		  ROS_INFO_STREAM("lowx"<<lowxpoint<<"   lowy" << lowypoint);
+		  ROS_INFO_STREAM("lowxabs"<<lowxabspoint<<"   lowyabs" << lowyabspoint);
+		  for(int i = lowxpoint ; i < lowxpoint+lowxabspoint ; i++){
+			for(int j = lowypoint ; j < lowypoint +lowyabspoint ; j++){
+				if (   FindDistanceToSegment(p1x, p1y, p2x, p2y, i,j) <= 2.0){
+//					ROS_INFO_STREAM("x,y""COST"<<(int)costmap->getCost(i,j));
+//					if ( (int)costmap->getCost(i,j) >= 253) {
+					if ( (int)costmap->getCost(i,j) >= 128) {
+						clear_path = false;
+					}
+				}
+			}
+		  }
+		  return clear_path;
+      }
 
       void mapToWorld(double mx, double my, double& wx, double& wy);
       void clearRobotCell(const tf::Stamped<tf::Pose>& global_pose, unsigned int mx, unsigned int my);

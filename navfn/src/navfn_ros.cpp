@@ -367,11 +367,151 @@ namespace navfn {
   bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start,
       const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan){
 
-    ROS_INFO_STREAM("Goal" << goal);
-    ROS_INFO_STREAM("start" << start);
     geometry_msgs::PoseStamped point1;
     geometry_msgs::PoseStamped point2;
+    geometry_msgs::PoseStamped point3;
+    geometry_msgs::PoseStamped point4;
+    geometry_msgs::PoseStamped point5;
+    geometry_msgs::PoseStamped point6;
+    geometry_msgs::PoseStamped point7;
+    geometry_msgs::PoseStamped point8;
+    geometry_msgs::PoseStamped point9;
+    geometry_msgs::PoseStamped point10;
+    geometry_msgs::PoseStamped point11;
+    geometry_msgs::PoseStamped point12;
+    geometry_msgs::PoseStamped point13;
+    geometry_msgs::PoseStamped point14;
+    geometry_msgs::PoseStamped point15;
+    geometry_msgs::PoseStamped point16;
 
+//    point1.header.frame_id = "map";
+//    point1.pose.position.x = (786.0 - 13.15*20)/20;
+//    point1.pose.position.y = (352.0 - 2.0*20)/20;
+//    point1.pose.orientation.x  = 0.0;
+//    point1.pose.orientation.y  = 0.0;
+//    point1.pose.orientation.z  = -0.709;
+//    point1.pose.orientation.w  = 0.7044;
+//
+//    point2.header.frame_id = "map";
+//    point2.pose.position.x = (776.0 - 13.15*20)/20;
+//    point2.pose.position.y = (446.0 - 2.0*20)/20;
+//    point2.pose.orientation.x  = 0.0;
+//    point2.pose.orientation.y  = 0.0;
+//    point2.pose.orientation.z  = -0.709;
+//    point2.pose.orientation.w  = 0.7044;
+
+    point3.header.frame_id = "map";
+    point3.pose.position.x = (663.0 - 13.15*20)/20;
+    point3.pose.position.y = (344.0 - 2.0*20)/20;
+    point3.pose.orientation.x  = 0.0;
+    point3.pose.orientation.y  = 0.0;
+    point3.pose.orientation.z  = -0.709;
+    point3.pose.orientation.w  = 0.7044;
+
+    point4.header.frame_id = "map";
+    point4.pose.position.x = (674.0 - 13.15*20)/20;
+    point4.pose.position.y = (447.0 - 2.0*20)/20;
+    point4.pose.orientation.x  = 0.0;
+    point4.pose.orientation.y  = 0.0;
+    point4.pose.orientation.z  = -0.709;
+    point4.pose.orientation.w  = 0.7044;
+//====
+    point5.header.frame_id = "map";
+    point5.pose.position.x = (929.0 - 13.15*20)/20;
+    point5.pose.position.y = (179.0 - 2.0*20)/20;
+    point5.pose.orientation.x  = 0.0;
+    point5.pose.orientation.y  = 0.0;
+    point5.pose.orientation.z  = -0.709;
+    point5.pose.orientation.w  = 0.7044;
+
+    point6.header.frame_id = "map";
+    point6.pose.position.x = (932.0 - 13.15*20)/20;
+    point6.pose.position.y = (100.0 - 2.0*20)/20;
+    point6.pose.orientation.x  = 0.0;
+    point6.pose.orientation.y  = 0.0;
+    point6.pose.orientation.z  = -0.709;
+    point6.pose.orientation.w  = 0.7044;
+
+    point7.header.frame_id = "map";
+    point7.pose.position.x = (830.0 - 13.15*20)/20;
+    point7.pose.position.y = (182.0 - 2.0*20)/20;
+    point7.pose.orientation.x  = 0.0;
+    point7.pose.orientation.y  = 0.0;
+    point7.pose.orientation.z  = -0.709;
+    point7.pose.orientation.w  = 0.7044;
+
+    point8.header.frame_id = "map";
+    point8.pose.position.x = (832.0 - 13.15*20)/20;
+    point8.pose.position.y = (96.0 - 2.0*20)/20;
+    point8.pose.orientation.x  = 0.0;
+    point8.pose.orientation.y  = 0.0;
+    point8.pose.orientation.z  = -0.709;
+    point8.pose.orientation.w  = 0.7044;
+//===
+    point9.header.frame_id = "map";
+    point9.pose.position.x = (214.0 - 13.15*20)/20;
+    point9.pose.position.y = (100.0 - 2.0*20)/20;
+    point9.pose.orientation.x  = 0.0;
+    point9.pose.orientation.y  = 0.0;
+    point9.pose.orientation.z  = -0.709;
+    point9.pose.orientation.w  = 0.7044;
+
+    point10.header.frame_id = "map";
+    point10.pose.position.x = (320.0 - 13.15*20)/20;
+    point10.pose.position.y = (100.0 - 2.0*20)/20;
+    point10.pose.orientation.x  = 0.0;
+    point10.pose.orientation.y  = 0.0;
+    point10.pose.orientation.z  = -0.709;
+    point10.pose.orientation.w  = 0.7044;
+
+    point11.header.frame_id = "map";
+    point11.pose.position.x = (211.0 - 13.15*20)/20;
+    point11.pose.position.y = (176.0 - 2.0*20)/20;
+    point11.pose.orientation.x  = 0.0;
+    point11.pose.orientation.y  = 0.0;
+    point11.pose.orientation.z  = -0.709;
+    point11.pose.orientation.w  = 0.7044;
+
+    point12.header.frame_id = "map";
+    point12.pose.position.x = (323.0 - 13.15*20)/20;
+    point12.pose.position.y = (171.0 - 2.0*20)/20;
+    point12.pose.orientation.x  = 0.0;
+    point12.pose.orientation.y  = 0.0;
+    point12.pose.orientation.z  = -0.709;
+    point12.pose.orientation.w  = 0.7044;
+//===
+    point13.header.frame_id = "map";
+    point13.pose.position.x = (216.0 - 13.15*20)/20;
+    point13.pose.position.y = (373.0 - 2.0*20)/20;
+    point13.pose.orientation.x  = 0.0;
+    point13.pose.orientation.y  = 0.0;
+    point13.pose.orientation.z  = -0.709;
+    point13.pose.orientation.w  = 0.7044;
+
+    point14.header.frame_id = "map";
+    point14.pose.position.x = (216.0 - 13.15*20)/20;
+    point14.pose.position.y = (445.0 - 2.0*20)/20;
+    point14.pose.orientation.x  = 0.0;
+    point14.pose.orientation.y  = 0.0;
+    point14.pose.orientation.z  = -0.709;
+    point14.pose.orientation.w  = 0.7044;
+
+    point15.header.frame_id = "map";
+    point15.pose.position.x = (315.0 - 13.15*20)/20;
+    point15.pose.position.y = (367.0 - 2.0*20)/20;
+    point15.pose.orientation.x  = 0.0;
+    point15.pose.orientation.y  = 0.0;
+    point15.pose.orientation.z  = -0.709;
+    point15.pose.orientation.w  = 0.7044;
+
+    point16.header.frame_id = "map";
+    point16.pose.position.x = (308.0 - 13.15*20)/20;
+    point16.pose.position.y = (443.0 - 2.0*20)/20;
+    point16.pose.orientation.x  = 0.0;
+    point16.pose.orientation.y  = 0.0;
+    point16.pose.orientation.z  = -0.709;
+    point16.pose.orientation.w  = 0.7044;
+//
     point1.header.frame_id = "map";
 //    point1.pose.position.x = 33.33;
 //    point1.pose.position.y = 15;
@@ -389,35 +529,64 @@ namespace navfn {
     point2.pose.orientation.y  = 0.0;
     point2.pose.orientation.z  = -0.709;
     point2.pose.orientation.w  = 0.7044;
+//
+//    point3.header.frame_id = "map";
+//    point3.pose.position.x = 22.73;
+//    point3.pose.position.y = 18.75;
+//    point3.pose.orientation.x  = 0.0;
+//    point3.pose.orientation.y  = 0.0;
+//    point3.pose.orientation.z  = -0.709;
+//    point3.pose.orientation.w  = 0.7044;
 
-    std::vector<geometry_msgs::PoseStamped> plan1;
-    std::vector<geometry_msgs::PoseStamped> plan2;
-    std::vector<geometry_msgs::PoseStamped> plan3;
 
-   makePlanSmall(start, point1, tolerance, plan1);
-   makePlanSmall(point1, point2, tolerance, plan2);
-   makePlanSmall(point2, goal, tolerance, plan3);
+    costmap_2d::Costmap2D* costmap = costmap_ros_->getCostmap();
+    std::string global_frame = costmap_ros_->getGlobalFrameID();
+    int mapx = costmap->getSizeInCellsX();
+    int mapy = costmap->getSizeInCellsY();
 
-   plan.clear();
-   plan.insert(plan.end(), plan1.begin(), plan1.end());
-   plan.insert(plan.end(), plan2.begin(), plan2.end());
-   plan.insert(plan.end(), plan3.begin(), plan3.end());
+//    double wx = start.pose.position.x;
+//    double wy = start.pose.position.y;
+//    unsigned int mx, my;
+//    ROS_INFO_STREAM("BEFORE************x:"<< wx << " y:" << wy);
+//    if(!costmap->worldToMap(wx, wy, mx, my)){
+//    }
+//    ROS_INFO_STREAM("AFTER************x:"<< mx << " y:" << my);
 
-//   makePlanSmall(start, goal, tolerance, plan);
-    //publish the plan for visualization purposes
-//    ROS_INFO_STREAM("Plan length" << plan.size());
-//    ROS_INFO_STREAM("Plan Ele0:" << plan[0]);
-//    ROS_INFO_STREAM("Plan Ele1:" << plan[0]);
-//    ROS_INFO_STREAM("Plan Ele10:" << plan[10]);
-//    ROS_INFO_STREAM("Plan Ele20:" << plan[20]);
 
+    std::vector<geometry_msgs::PoseStamped> points;
+    points.push_back(start);
+    points.push_back(point1);
+    points.push_back(point2);
+//    points.push_back(point3);
+//    points.push_back(point4);
+//    points.push_back(point5);
+//    points.push_back(point6);
+//    points.push_back(point7);
+//    points.push_back(point8);
+//    points.push_back(point9);
+//    points.push_back(point10);
+//    points.push_back(point11);
+//    points.push_back(point12);
+//    points.push_back(point13);
+//    points.push_back(point14);
+//    points.push_back(point15);
+//    points.push_back(point16);
+    points.push_back(goal);
+//Can two points be seen from one another
+
+//    ROS_INFO_STREAM("************1: " << clear_path(point5,point2));
+//    ROS_INFO_STREAM("************1: " << clear_path(point5,point3));
+//    ROS_INFO_STREAM("************1: " << clear_path(point5,point4));
+//    ROS_INFO_STREAM("************1: " << clear_path(point5,point7));
+//    ROS_INFO_STREAM("************1: " << clear_path(point5,point6));
+
+    for ( int i = 0; i < points.size()-1; ++ i) {
+    	std::vector<geometry_msgs::PoseStamped> plantemp;
+    	plantemp.clear();
+    	makePlanSmall(points[i], points[i+1], tolerance, plantemp);
+    	plan.insert(plan.end(), plantemp.begin(), plantemp.end());
+	}
     publishPlan(plan, 0.0, 1.0, 0.0, 0.0);
-//    sleep(10);
-//    publishPlan(plan1, 0.0, 1.0, 0.0, 0.0);
-//    sleep(10);
-//    publishPlan(plan1, 0.0, 1.0, 0.0, 0.0);
-//    sleep(10);
-
     return !plan.empty();
   }
 
@@ -512,4 +681,7 @@ namespace navfn {
 //    publishPlan(plan, 0.0, 1.0, 0.0, 0.0);
     return !plan.empty();
   }
+
+
+
 };
