@@ -612,12 +612,15 @@ double degToPointFound = degToPoint(points[0].pose.position.x, points[0].pose.po
     ROS_INFO_STREAM("Middle Angle is" << degToPointFound << " From Points"<<points[0].pose.position.x<<","<< points[0].pose.position.y <<","<< points[1].pose.position.x <<","<< points[1].pose.position.y );
     for( int i = start_deg; i <= end_deg; i+=angle_step ){
         pcl::PointCloud<pcl::PointXYZ>::Ptr tempCloud(new pcl::PointCloud<pcl::PointXYZ>);
+        ROS_INFO("Calling findInliers");
+        ROS_INFO_STREAM("MapX,MapY"<< mapx<< " , " << mapy);
         pcl::copyPointCloud( findInliers(mx,my, start_deg, start_deg+robotOdomThreshold), *tempCloud);
         if(tempCloud->points.size() > longest_so_far->points.size()){
             pcl::copyPointCloud( *tempCloud, *longest_so_far);
         }
         
     }
+
 
     for(int i = 0; i < longest_so_far->points.size(); i++){
         ROS_INFO_STREAM("Point"<< i <<" " <<longest_so_far->points[i].x  <<  longest_so_far->points[i].y  <<  longest_so_far->points[i].z  <<std::endl);

@@ -254,11 +254,12 @@ namespace navfn {
       }
 
     inline bool isPointInRange(int x1,int y1,int x2,int y2,int start_deg,int end_deg){
-        int xdiff = abs(x2-x1);
-        int ydiff = abs(y2-y1);
+        double xdiff = abs(x2-x1);
+        double ydiff = abs(y2-y1);
         double theta;
             theta = atan(ydiff/xdiff);
         if( xdiff > 0   &&  ydiff > 0){ //QUAD 1
+            theta = atan(ydiff/xdiff);
         }
         else if( xdiff < 0   &&  ydiff > 0){ //QUAD 2
             theta = M_PI - atan(ydiff/xdiff);
@@ -276,11 +277,12 @@ namespace navfn {
         return false;
     }
     inline double degToPoint(int x1,int y1,int x2,int y2){
-        int xdiff = abs(x2-x1);
-        int ydiff = abs(y2-y1);
+        double xdiff = abs(x2-x1);
+        double ydiff = abs(y2-y1);
         double theta;
             theta = atan(ydiff/xdiff);
         if( xdiff > 0   &&  ydiff > 0){ //QUAD 1
+            theta = atan(ydiff/xdiff);
         }
         else if( xdiff < 0   &&  ydiff > 0){ //QUAD 2
             theta = M_PI - atan(ydiff/xdiff);
@@ -303,6 +305,7 @@ namespace navfn {
 
         pcl::SampleConsensusModelLine<pcl::PointXYZ>::Ptr model_l (new pcl::SampleConsensusModelLine<pcl::PointXYZ> (cloud));
 
+        ROS_INFO("Calling Ransac");
         pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_l);
         ransac.setDistanceThreshold (dist_treshold);
         ransac.computeModel();
@@ -328,7 +331,7 @@ namespace navfn {
         int mapx = costmap->getSizeInCellsX();
         int mapy = costmap->getSizeInCellsY();
 
-
+        int iter = 0;
         for( int i = 0; i < mapx; i++){
             for( int j = 0; j < mapy; j++){
                 if(costmap->getIndex(i,j) >= 254){
@@ -343,7 +346,12 @@ namespace navfn {
                     costmap->mapToWorld(i,j,tempGoToLoc.pose.position.x, tempGoToLoc.pose.position.y);
                     
                     //if(clear_path(tempRobotPose, tempGoToLoc)  && isPointInRange(robotPoseX,robotPoseY,i,j,start_deg,end_deg)){
+                    if (iter%10000 == 0) {
+                        ROS_INFO_STREAM("Calling isPointInRange"<<iter);
+                    }
+                    iter++;
                     if(isPointInRange(robotPoseX,robotPoseY,i,j,start_deg,end_deg)){
+                        ROS_INFO_STREAM("Adding Point to cloud");
                         pcl::PointXYZ tempPoint;
                         tempPoint.x = i;
                         tempPoint.y = j;
@@ -353,6 +361,7 @@ namespace navfn {
                 }
             }
         }
+        ROS_INFO("Calling findLongestLineInCloud");
         pcl::copyPointCloud<pcl::PointXYZ>( findLongestLineInCloud(cloud,4), *final);
         return *final;
     }
