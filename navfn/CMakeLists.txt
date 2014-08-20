@@ -16,6 +16,8 @@ find_package(catkin REQUIRED
         visualization_msgs
         )
 
+link_directories(${PCL_LIBRARY_DIRS})
+
 find_package(Eigen REQUIRED)
 find_package(PCL REQUIRED)
 include_directories(
@@ -26,6 +28,7 @@ include_directories(
     ${PCL_INCLUDE_DIRS}
 )
 add_definitions(${EIGEN_DEFINITIONS})
+add_definitions(${PCL_DEFINITIONS})
 
 
 # services

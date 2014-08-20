@@ -49,6 +49,19 @@
 #include <nav_msgs/GetPlan.h>
 #include <navfn/potarr_point.h>
 #include <pcl_ros/publisher.h>
+#include <pcl_conversions/pcl_conversions.h>
+
+#include <iostream>
+#include <pcl/console/parse.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/sac_model_sphere.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <boost/thread/thread.hpp>
+#include <pcl/sample_consensus/sac_model_line.h>
 
 namespace navfn {
   /**
@@ -239,6 +252,111 @@ namespace navfn {
 		  }
 		  return clear_path;
       }
+
+    inline bool isPointInRange(int x1,int y1,int x2,int y2,int start_deg,int end_deg){
+        int xdiff = abs(x2-x1);
+        int ydiff = abs(y2-y1);
+        double theta;
+            theta = atan(ydiff/xdiff);
+        if( xdiff > 0   &&  ydiff > 0){ //QUAD 1
+        }
+        else if( xdiff < 0   &&  ydiff > 0){ //QUAD 2
+            theta = M_PI - atan(ydiff/xdiff);
+        }
+        else if( xdiff < 0   &&  ydiff < 0){ //QUAD 3
+            theta = atan(ydiff/xdiff) + M_PI;
+        }
+        else if( xdiff > 0   &&  ydiff < 0){ //QUAD 4
+            theta =2*M_PI - atan(ydiff/xdiff);
+        }
+
+        if( theta > start_deg && theta < end_deg){
+            return true;
+        }
+        return false;
+    }
+    inline double degToPoint(int x1,int y1,int x2,int y2){
+        int xdiff = abs(x2-x1);
+        int ydiff = abs(y2-y1);
+        double theta;
+            theta = atan(ydiff/xdiff);
+        if( xdiff > 0   &&  ydiff > 0){ //QUAD 1
+        }
+        else if( xdiff < 0   &&  ydiff > 0){ //QUAD 2
+            theta = M_PI - atan(ydiff/xdiff);
+        }
+        else if( xdiff < 0   &&  ydiff < 0){ //QUAD 3
+            theta = atan(ydiff/xdiff) + M_PI;
+        }
+        else if( xdiff > 0   &&  ydiff < 0){ //QUAD 4
+            theta =2*M_PI - atan(ydiff/xdiff);
+        }
+
+        return theta;
+    }
+
+    pcl::PointCloud<pcl::PointXYZ> findLongestLineInCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double dist_treshold){
+
+        // initialize PointClouds
+        pcl::PointCloud<pcl::PointXYZ>::Ptr final (new pcl::PointCloud<pcl::PointXYZ>);
+        std::vector<int> inliers;
+
+        pcl::SampleConsensusModelLine<pcl::PointXYZ>::Ptr model_l (new pcl::SampleConsensusModelLine<pcl::PointXYZ> (cloud));
+
+        pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_l);
+        ransac.setDistanceThreshold (dist_treshold);
+        ransac.computeModel();
+        ransac.getInliers(inliers);
+        pcl::copyPointCloud<pcl::PointXYZ>(*cloud, inliers, *final);
+        
+        //for(int i = 0; i < final->points.size(); i++){
+            //ROS_INFO_STREAM("Point"<< i<<" " <<final->points[i].x  <<  final->points[i].y  <<  final->points[i].z  <<std::endl);
+        //}
+        return *final;
+    }
+
+    inline pcl::PointCloud<pcl::PointXYZ> findInliers (int robotPoseX, int robotPoseY, double start_deg,double end_deg){
+        //unsigned int robotPoseX = mx;
+        //unsigned int robotPoseY = my;
+        //double start_deg = 0;
+        //double end_deg = M_PI;
+        
+        pcl::PointCloud<pcl::PointXYZ>::Ptr final (new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+        costmap_2d::Costmap2D* costmap = costmap_ros_->getCostmap();
+        std::string global_frame = costmap_ros_->getGlobalFrameID();
+        int mapx = costmap->getSizeInCellsX();
+        int mapy = costmap->getSizeInCellsY();
+
+
+        for( int i = 0; i < mapx; i++){
+            for( int j = 0; j < mapy; j++){
+                if(costmap->getIndex(i,j) >= 254){
+                    geometry_msgs::PoseStamped tempRobotPose;
+                    tempRobotPose.header.frame_id = "map";
+                    //tempRobotPose.pose.position.x = wx;
+                    //tempRobotPose.pose.position.y = wy;
+                    costmap->mapToWorld(robotPoseX,robotPoseY,tempRobotPose.pose.position.x, tempRobotPose.pose.position.y);
+
+                    geometry_msgs::PoseStamped tempGoToLoc;
+                    tempGoToLoc.header.frame_id = "map";
+                    costmap->mapToWorld(i,j,tempGoToLoc.pose.position.x, tempGoToLoc.pose.position.y);
+                    
+                    //if(clear_path(tempRobotPose, tempGoToLoc)  && isPointInRange(robotPoseX,robotPoseY,i,j,start_deg,end_deg)){
+                    if(isPointInRange(robotPoseX,robotPoseY,i,j,start_deg,end_deg)){
+                        pcl::PointXYZ tempPoint;
+                        tempPoint.x = i;
+                        tempPoint.y = j;
+                        tempPoint.z = 0;
+                        cloud->push_back(tempPoint);
+                    }
+                }
+            }
+        }
+        pcl::copyPointCloud<pcl::PointXYZ>( findLongestLineInCloud(cloud,4), *final);
+        return *final;
+    }
+
 
       void mapToWorld(double mx, double my, double& wx, double& wy);
       void clearRobotCell(const tf::Stamped<tf::Pose>& global_pose, unsigned int mx, unsigned int my);

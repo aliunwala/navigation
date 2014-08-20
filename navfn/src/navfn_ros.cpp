@@ -2,8 +2,8 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2008, Willow Garage, Inc.
 *  All rights reserved.
+*  Copyright (c) 2008, Willow Garage, Inc.
 *
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
@@ -41,6 +41,18 @@
 #include <costmap_2d/costmap_2d.h>
 
 #include <pcl_conversions/pcl_conversions.h>
+
+#include <iostream>
+#include <pcl/console/parse.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/sac_model_sphere.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <boost/thread/thread.hpp>
+#include <pcl/sample_consensus/sac_model_line.h>
 
 //register this planner as a BaseGlobalPlanner plugin
 PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, nav_core::BaseGlobalPlanner)
@@ -544,13 +556,13 @@ namespace navfn {
     int mapx = costmap->getSizeInCellsX();
     int mapy = costmap->getSizeInCellsY();
 
-//    double wx = start.pose.position.x;
-//    double wy = start.pose.position.y;
-//    unsigned int mx, my;
-//    ROS_INFO_STREAM("BEFORE************x:"<< wx << " y:" << wy);
-//    if(!costmap->worldToMap(wx, wy, mx, my)){
-//    }
-//    ROS_INFO_STREAM("AFTER************x:"<< mx << " y:" << my);
+    double wx = start.pose.position.x;
+    double wy = start.pose.position.y;
+    unsigned int mx, my;
+    ROS_INFO_STREAM("BEFORE************x:"<< wx << " y:" << wy);
+    if(!costmap->worldToMap(wx, wy, mx, my)){
+    }
+    ROS_INFO_STREAM("AFTER************x:"<< mx << " y:" << my);
 
 
     std::vector<geometry_msgs::PoseStamped> points;
@@ -586,6 +598,122 @@ namespace navfn {
     	makePlanSmall(points[i], points[i+1], tolerance, plantemp);
     	plan.insert(plan.end(), plantemp.begin(), plantemp.end());
 	}
+
+    isPointInRange(1,1,2,2,0,M_PI/5);
+
+
+    
+    pcl::PointCloud<pcl::PointXYZ>::Ptr longest_so_far (new pcl::PointCloud<pcl::PointXYZ>);
+    double robotOdomThreshold = M_PI*(20/180.0); //20 Deg
+    double angle_step = M_PI*(5/180.0);
+double degToPointFound = degToPoint(points[0].pose.position.x, points[0].pose.position.y,points[1].pose.position.x, points[1].pose.position.y);
+    double end_deg = degToPointFound+(M_PI/6);
+    double start_deg = degToPointFound-(M_PI/6); 
+    ROS_INFO_STREAM("Middle Angle is" << degToPointFound << " From Points"<<points[0].pose.position.x<<","<< points[0].pose.position.y <<","<< points[1].pose.position.x <<","<< points[1].pose.position.y );
+    for( int i = start_deg; i <= end_deg; i+=angle_step ){
+        pcl::PointCloud<pcl::PointXYZ>::Ptr tempCloud(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::copyPointCloud( findInliers(mx,my, start_deg, start_deg+robotOdomThreshold), *tempCloud);
+        if(tempCloud->points.size() > longest_so_far->points.size()){
+            pcl::copyPointCloud( *tempCloud, *longest_so_far);
+        }
+        
+    }
+
+    for(int i = 0; i < longest_so_far->points.size(); i++){
+        ROS_INFO_STREAM("Point"<< i <<" " <<longest_so_far->points[i].x  <<  longest_so_far->points[i].y  <<  longest_so_far->points[i].z  <<std::endl);
+    }
+
+    //unsigned int robotPoseX = mx;
+    //unsigned int robotPoseY = my;
+    //double start_deg = 0;
+    //double end_deg = M_PI;
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+
+
+    //for( int i = 0; i < mapx; i++){
+        //for( int j = 0; j < mapy; j++){
+            //if(costmap->getIndex(i,j) >= 254){
+                //geometry_msgs::PoseStamped tempRobotPose;
+                //tempRobotPose.header.frame_id = "map";
+                //tempRobotPose.pose.position.x = wx;
+                //tempRobotPose.pose.position.y = wy;
+
+                //geometry_msgs::PoseStamped tempGoToLoc;
+                //tempGoToLoc.header.frame_id = "map";
+                //costmap->mapToWorld(i,j,tempGoToLoc.pose.position.x, tempGoToLoc.pose.position.y);
+                
+                //if(clear_path(tempRobotPose, tempGoToLoc)  && isPointInRange(robotPoseX,robotPoseY,i,j,start_deg,end_deg)){
+                    //pcl::PointXYZ tempPoint;
+                    //tempPoint.x = i;
+                    //tempPoint.y = j;
+                    //tempPoint.z = 0;
+                    //cloud->push_back(tempPoint);
+                //}
+            //}
+        //}
+    //}
+    //cloud = findLongestLineInCloud(cloud,4);
+    //return *cloud;
+
+
+//ROS_INFO("*******************Before");
+  //// initialize PointClouds
+  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  //pcl::PointCloud<pcl::PointXYZ>::Ptr final (new pcl::PointCloud<pcl::PointXYZ>);
+  ////pcl::PointCloud<pcl::PointXY>::Ptr final1 (new pcl::PointCloud<pcl::PointXY>);
+
+  //// populate our PointCloud with points
+  //cloud->width    = 6;
+  //cloud->height   = 1;
+  //cloud->is_dense = false;
+  //cloud->points.resize (cloud->width * cloud->height);
+  //int argc;
+  //char ** argv;
+  //cloud->points[0].x = 1;
+  //cloud->points[0].y = 1;
+  //cloud->points[0].z = 0;
+
+  //cloud->points[1].x = 2;
+  //cloud->points[1].y = 2;
+  //cloud->points[1].z = 0;
+
+  //cloud->points[2].x = 3;
+  //cloud->points[2].y = 3;
+  //cloud->points[2].z = 0;
+
+  //cloud->points[3].x = 4;
+  //cloud->points[3].y = 4;
+  //cloud->points[3].z = 0;
+
+  //cloud->points[4].x = 4;
+  //cloud->points[4].y = 6;
+  //cloud->points[4].z = 0;
+  
+  //cloud->points[5].x = 5;
+  //cloud->points[5].y = 10;
+  //cloud->points[5].z = 10;
+
+
+
+  //std::vector<int> inliers;
+
+  //pcl::SampleConsensusModelLine<pcl::PointXYZ>::Ptr
+    //model_l (new pcl::SampleConsensusModelLine<pcl::PointXYZ> (cloud));
+
+    //pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_l);
+    //ransac.setDistanceThreshold (2);
+    //ransac.computeModel();
+    //ransac.getInliers(inliers);
+
+  //pcl::copyPointCloud<pcl::PointXYZ>(*cloud, inliers, *final);
+  //for(int i = 0; i < final->points.size(); i++){
+  //ROS_INFO_STREAM("Point"<< i<<" " <<final->points[i].x  <<  final->points[i].y  <<  final->points[i].z  <<std::endl);
+  //}
+
+
+
+
+
     publishPlan(plan, 0.0, 1.0, 0.0, 0.0);
     return !plan.empty();
   }
